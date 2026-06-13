@@ -2,12 +2,12 @@ name: Deploy Frontend to GitHub Pages
 
 on:
   push:
-    branches: [main]            # Trigger on every push to main
+    branches: [main]
     paths:
-      - 'public/**'             # Only rebuild when frontend files change
-      - '.github/workflows/**'
+      - 'public/**'
+      - '.github/workflows/deploy-pages.yml'
 
-  workflow_dispatch:            # Allow manual trigger from GitHub UI
+  workflow_dispatch:             # Allow manual trigger from GitHub UI
 
 permissions:
   contents: read
@@ -18,6 +18,10 @@ permissions:
 concurrency:
   group: "pages"
   cancel-in-progress: true
+
+env:
+  # Opt into Node.js 24 now to avoid deprecation warnings
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   deploy:
@@ -32,12 +36,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup GitHub Pages
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v5
 
       - name: Upload public/ as Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Deploy only the contents of public/
           path: './public'
 
       - name: Deploy to GitHub Pages
