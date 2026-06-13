@@ -107,12 +107,13 @@
   // --------------------------------------------------------------------------
   // 2. Application Setup & State Management
   // --------------------------------------------------------------------------
-  function init() {
+  async function init() {
     loadTheme();
-    loadState();
+    await loadState();
     setupEventListeners();
     renderUserXP();
     updateUIForOnboardState();
+    updateAuthUI();
     
     // If not onboarded, block user interaction and show onboarding popup
     if (!state.onboarded) {
@@ -122,24 +123,71 @@
     }
   }
 
-  function loadState() {
+  async function loadState() {
     try {
-      const saved = localStorage.getItem("ecostride_state");
-      if (saved) {
-        state = JSON.parse(saved);
-        // Sync structures in case of version upgrades
-        state.calculatorInputs = { ...DEFAULT_STATE.calculatorInputs, ...state.calculatorInputs };
+      const token = localStorage.getItem('ecostride_token');
+      if (token) {
+        const response = await fetch('/api/user/data', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const saved = await response.json();
+          if (Object.keys(saved).length > 0) {
+            state = { ...DEFAULT_STATE, ...saved };
+            state.calculatorInputs = { ...DEFAULT_STATE.calculatorInputs, ...state.calculatorInputs };
+          }
+        } else {
+          if(response.status === 401 || response.status === 403) {
+            localStorage.removeItem('ecostride_token');
+          }
+        }
+      } else {
+        const saved = localStorage.getItem("ecostride_state");
+        if (saved) {
+          state = JSON.parse(saved);
+          state.calculatorInputs = { ...DEFAULT_STATE.calculatorInputs, ...state.calculatorInputs };
+        }
       }
     } catch (e) {
-      console.error("Failed to load local state", e);
+      console.error("Failed to load state", e);
     }
   }
 
-  function saveState() {
+  async function saveState() {
     try {
-      localStorage.setItem("ecostride_state", JSON.stringify(state));
+      localStorage.setItem("ecostride_state", JSON.stringify(state)); // local fallback
+      const token = localStorage.getItem('ecostride_token');
+      if (token) {
+        await fetch('/api/user/data', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(state)
+        });
+      }
     } catch (e) {
-      console.error("Failed to save local state", e);
+      console.error("Failed to save state", e);
+    }
+  }
+
+  function updateAuthUI() {
+    const token = localStorage.getItem('ecostride_token');
+    const loginLink = document.getElementById('login-link');
+    const signupLink = document.getElementById('signup-link');
+    
+    if (token) {
+      if (loginLink) loginLink.style.display = 'none';
+      if (signupLink) {
+        signupLink.textContent = 'Logout';
+        signupLink.href = '#';
+        signupLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          localStorage.removeItem('ecostride_token');
+          window.location.reload();
+        });
+      }
     }
   }
 

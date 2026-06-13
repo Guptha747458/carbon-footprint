@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - EcoStride</title>
+  <title>Sign Up - EcoStride</title>
   
   <!-- Google Fonts - Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -31,11 +31,19 @@
             <i class="fa-solid fa-seedling"></i>
           </div>
         </a>
-        <h2>Welcome Back</h2>
-        <p>Login to track your footprint</p>
+        <h2>Join EcoStride</h2>
+        <p>Create an account to start your journey</p>
       </div>
 
-      <form action="index.html" class="auth-form" onsubmit="event.preventDefault(); window.location.href='index.html';">
+      <form class="auth-form">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <div class="input-with-icon">
+            <i class="fa-solid fa-user input-icon"></i>
+            <input type="text" id="name" name="name" required placeholder="John Doe">
+          </div>
+        </div>
+
         <div class="form-group">
           <label for="email">Email Address</label>
           <div class="input-with-icon">
@@ -54,15 +62,16 @@
 
         <div class="auth-actions">
           <button type="submit" class="btn btn-primary btn-large full-width">
-            Login <i class="fa-solid fa-arrow-right"></i>
+            Sign Up <i class="fa-solid fa-arrow-right"></i>
           </button>
         </div>
       </form>
 
       <div class="auth-footer text-center">
-        <p>Don't have an account? <a href="signup.html" class="auth-link">Sign Up</a></p>
+        <p>Already have an account? <a href="login.html" class="auth-link">Login</a></p>
       </div>
     </div>
   </main>
+  <script src="js/auth.js"></script>
 </body>
 </html>
