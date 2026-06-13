@@ -1,0 +1,43 @@
+name: Keep Render Backend Alive (Anti-Sleep Ping)
+
+# Render's free tier spins down after 15 minutes of inactivity.
+# This workflow pings the /api/health endpoint every 14 minutes
+# to prevent the service from sleeping.
+
+on:
+  schedule:
+    # Runs every 14 minutes, 24/7
+    # Format: minute hour day-of-month month day-of-week
+    - cron: '*/14 * * * *'
+
+  # Allow manual trigger from the GitHub Actions tab
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Ping Render Backend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ping /api/health
+        run: |
+          echo "⏰ $(date '+%Y-%m-%d %H:%M:%S UTC') — Pinging backend..."
+
+          HTTP_STATUS=$(curl \
+            --silent \
+            --output /dev/null \
+            --write-out "%{http_code}" \
+            --max-time 30 \
+            "${{ secrets.RENDER_BACKEND_URL }}/api/health")
+
+          echo "📡 HTTP Status: $HTTP_STATUS"
+
+          if [ "$HTTP_STATUS" -eq 200 ]; then
+            echo "✅ Backend is alive and healthy."
+          elif [ "$HTTP_STATUS" -eq 503 ]; then
+            echo "⚠️  Backend responded but DB may be disconnected (503)."
+            exit 1
+          else
+            echo "❌ Unexpected status: $HTTP_STATUS"
+            exit 1
+          fi

@@ -1,26 +1,38 @@
 # render.yaml — Render deployment configuration
 # Docs: https://render.com/docs/render-yaml-spec
+#
+# ─── PLAN OPTIONS ─────────────────────────────────────────────────────────────
+#
+#  free     → $0/month. Spins down after 15 min inactivity (~30s cold start).
+#             Anti-sleep ping via GitHub Actions keeps it alive 24/7 for free.
+#             See: .github/workflows/keep-alive.yml
+#
+#  starter  → $7/month. Always-on. No cold starts. Recommended for production.
+#             Change plan: free → starter below, then redeploy.
+#
+# ──────────────────────────────────────────────────────────────────────────────
 
 services:
   - type: web
     name: ecostride
     runtime: node
-    plan: free                      # Change to 'starter' for production
+    plan: free                      # ← Change to 'starter' for always-on ($7/mo)
     buildCommand: npm install
     startCommand: node server.js
-    healthCheckPath: /api/health
+    healthCheckPath: /api/health    # Used by Render + keep-alive.yml ping
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 10000                # Render assigns this automatically
+
       - key: MONGODB_URI
         sync: false                 # Set this manually in Render dashboard (secret)
+
       - key: JWT_SECRET
         generateValue: true         # Render auto-generates a secure random value
+
       - key: ALLOWED_ORIGIN
         # Set to your GitHub Pages URL, e.g.:
         #   https://guptha747458.github.io
-        # Or comma-separated for multiple:
+        # Comma-separated for multiple origins:
         #   https://guptha747458.github.io,https://ecostride.onrender.com
         sync: false                 # Set manually in Render dashboard
