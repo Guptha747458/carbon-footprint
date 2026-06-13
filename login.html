@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - EcoStride</title>
+  
+  <!-- Google Fonts - Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+<body class="auth-page">
+  <!-- Ambient Background Blobs -->
+  <div class="ambient-blob blob-1"></div>
+  <div class="ambient-blob blob-2"></div>
+  <div class="ambient-blob blob-3"></div>
+
+  <main class="auth-container">
+    <div class="auth-card glass-panel">
+      <div class="auth-header text-center">
+        <a href="index.html" class="brand-logo-link">
+          <div class="brand-icon mx-auto">
+            <i class="fa-solid fa-seedling"></i>
+          </div>
+        </a>
+        <h2>Welcome Back</h2>
+        <p>Login to track your footprint</p>
+      </div>
+
+      <form action="index.html" class="auth-form" onsubmit="event.preventDefault(); window.location.href='index.html';">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <div class="input-with-icon">
+            <i class="fa-solid fa-envelope input-icon"></i>
+            <input type="email" id="email" name="email" required placeholder="you@example.com">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-with-icon">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input type="password" id="password" name="password" required placeholder="••••••••">
+          </div>
+        </div>
+
+        <div class="auth-actions">
+          <button type="submit" class="btn btn-primary btn-large full-width">
+            Login <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </form>
+
+      <div class="auth-footer text-center">
+        <p>Don't have an account? <a href="signup.html" class="auth-link">Sign Up</a></p>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
