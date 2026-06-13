@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Login to your EcoStride account to track and reduce your carbon footprint.">
   <title>Login - EcoStride</title>
   
   <!-- Google Fonts - Plus Jakarta Sans -->
@@ -35,26 +36,26 @@
         <p>Login to track your footprint</p>
       </div>
 
-      <form class="auth-form">
+      <form class="auth-form" id="login-form" novalidate>
         <div class="form-group">
-          <label for="email">Email Address</label>
+          <label for="login-email">Email Address</label>
           <div class="input-with-icon">
-            <i class="fa-solid fa-envelope input-icon"></i>
-            <input type="email" id="email" name="email" required placeholder="you@example.com">
+            <i class="fa-solid fa-envelope input-icon" aria-hidden="true"></i>
+            <input type="email" id="login-email" name="email" required autocomplete="email" placeholder="you@example.com">
           </div>
         </div>
 
         <div class="form-group">
-          <label for="password">Password</label>
+          <label for="login-password">Password</label>
           <div class="input-with-icon">
-            <i class="fa-solid fa-lock input-icon"></i>
-            <input type="password" id="password" name="password" required placeholder="••••••••">
+            <i class="fa-solid fa-lock input-icon" aria-hidden="true"></i>
+            <input type="password" id="login-password" name="password" required autocomplete="current-password" placeholder="••••••••">
           </div>
         </div>
 
         <div class="auth-actions">
           <button type="submit" class="btn btn-primary btn-large full-width">
-            Login <i class="fa-solid fa-arrow-right"></i>
+            Login <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
           </button>
         </div>
       </form>
@@ -64,6 +65,7 @@
       </div>
     </div>
   </main>
+  <script src="js/config.js"></script>
   <script src="js/auth.js"></script>
 </body>
 </html>

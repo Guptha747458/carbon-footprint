@@ -33,6 +33,7 @@
   let state = { ...DEFAULT_STATE };
   let activeTab = "dashboard";
   let chartInstances = { category: null, comparison: null };
+  let saveStateTimer = null; // for debouncing saveState network calls
 
   // Helper selectors
   const DOM = {
@@ -49,6 +50,7 @@
     calcResultVal: document.getElementById("calc-result-val"),
     calcResultComparison: document.getElementById("calc-result-comparison"),
     btnCalcGoDashboard: document.getElementById("btn-calc-go-dashboard"),
+    btnCalcDownloadPdf: document.getElementById("btn-calc-download-pdf"),
     btnCalcReassess: document.getElementById("btn-calc-reassess"),
 
     // Dashboard KPIs
@@ -127,7 +129,7 @@
     try {
       const token = localStorage.getItem('ecostride_token');
       if (token) {
-        const response = await fetch('/api/user/data', {
+        const response = await apiFetch('/api/user/data', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (response.ok) {
@@ -155,17 +157,25 @@
 
   async function saveState() {
     try {
-      localStorage.setItem("ecostride_state", JSON.stringify(state)); // local fallback
+      localStorage.setItem("ecostride_state", JSON.stringify(state)); // local fallback always immediate
       const token = localStorage.getItem('ecostride_token');
       if (token) {
-        await fetch('/api/user/data', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(state)
-        });
+        // Debounce network call — wait 1s after last change before posting
+        clearTimeout(saveStateTimer);
+        saveStateTimer = setTimeout(async () => {
+          try {
+            await apiFetch('/api/user/data', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify(state)
+            });
+          } catch (e) {
+            console.error("Failed to sync state to server", e);
+          }
+        }, 1000);
       }
     } catch (e) {
       console.error("Failed to save state", e);
@@ -176,13 +186,16 @@
     const token = localStorage.getItem('ecostride_token');
     const loginLink = document.getElementById('login-link');
     const signupLink = document.getElementById('signup-link');
-    
+
     if (token) {
       if (loginLink) loginLink.style.display = 'none';
       if (signupLink) {
         signupLink.textContent = 'Logout';
         signupLink.href = '#';
-        signupLink.addEventListener('click', (e) => {
+        // Clone node to remove any previously attached listeners before adding a new one
+        const newSignupLink = signupLink.cloneNode(true);
+        signupLink.parentNode.replaceChild(newSignupLink, signupLink);
+        newSignupLink.addEventListener('click', (e) => {
           e.preventDefault();
           localStorage.removeItem('ecostride_token');
           window.location.reload();
@@ -276,14 +289,12 @@
       return;
     }
     activeTab = targetTab;
-    
+
     // Update nav buttons
     DOM.navButtons.forEach(btn => {
-      if (btn.getAttribute("data-tab") === targetTab) {
-        btn.classList.add("active");
-      } else {
-        btn.classList.remove("active");
-      }
+      const isActive = btn.getAttribute("data-tab") === targetTab;
+      btn.classList.toggle("active", isActive);
+      btn.setAttribute("aria-selected", isActive ? "true" : "false");
     });
 
     // Update view sections visibility
@@ -310,10 +321,10 @@
   function renderDashboard() {
     if (!state.onboarded) return;
 
-    // 1. Calculations
+    // 1. Calculations — use cached baseline, only recalculate when needed
     const results = calculateFootprint(state.calculatorInputs);
+    // Update baseline without triggering a network save on every render
     state.baseline = results.total;
-    saveState();
 
     // 2. Set KPI Cards
     DOM.kpiBaseline.textContent = state.baseline.toFixed(1);
@@ -386,92 +397,104 @@
     const labelColor = isDark ? "#94a3b8" : "#475569";
     const fontName = "Plus Jakarta Sans";
 
-    // 1. Doughnut Chart: Breakdown by category
+    // ── 1. Doughnut Chart: Breakdown by category ──────────────────────────────
     const categoryCtx = document.getElementById("categoryChart").getContext("2d");
-    if (chartInstances.category) chartInstances.category.destroy();
-    
-    chartInstances.category = new Chart(categoryCtx, {
-      type: "doughnut",
-      data: {
-        labels: ["Transportation", "Home Energy", "Diet & Waste"],
-        datasets: [{
-          data: [breakdown.transport, breakdown.energy, breakdown.diet],
-          backgroundColor: ["#06b6d4", "#10b981", "#6366f1"],
-          borderWidth: 0,
-          hoverOffset: 6
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: "bottom",
-            labels: {
-              color: labelColor,
-              font: { family: fontName, size: 11, weight: 600 },
-              padding: 15
-            }
-          }
+    const categoryData = [breakdown.transport, breakdown.energy, breakdown.diet];
+
+    if (chartInstances.category) {
+      // Update existing chart instead of destroying and recreating
+      chartInstances.category.data.datasets[0].data = categoryData;
+      chartInstances.category.options.plugins.legend.labels.color = labelColor;
+      chartInstances.category.update();
+    } else {
+      chartInstances.category = new Chart(categoryCtx, {
+        type: "doughnut",
+        data: {
+          labels: ["Transportation", "Home Energy & Waste", "Diet"],
+          datasets: [{
+            data: categoryData,
+            backgroundColor: ["#06b6d4", "#10b981", "#6366f1"],
+            borderWidth: 0,
+            hoverOffset: 6
+          }]
         },
-        cutout: "70%"
-      }
-    });
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: {
+                color: labelColor,
+                font: { family: fontName, size: 11, weight: 600 },
+                padding: 15
+              }
+            }
+          },
+          cutout: "70%"
+        }
+      });
+    }
 
-    // 2. Comparison Bar Chart: Baseline vs Benchmarks
+    // ── 2. Comparison Bar Chart: Baseline vs Benchmarks ───────────────────────
     const comparisonCtx = document.getElementById("comparisonChart").getContext("2d");
-    if (chartInstances.comparison) chartInstances.comparison.destroy();
-
     const benchmarks = ECO_DATA.nationalAverages;
     const userVal = state.baseline;
-    
-    chartInstances.comparison = new Chart(comparisonCtx, {
-      type: "bar",
-      data: {
-        labels: ["Your Footprint", "Climate Target", "Global Avg", "EU Avg", "US Avg"],
-        datasets: [{
-          data: [
-            userVal, 
-            benchmarks.Target / 1000, 
-            benchmarks.Global / 1000, 
-            benchmarks.EU / 1000, 
-            benchmarks.US / 1000
-          ],
-          backgroundColor: [
-            userVal <= benchmarks.Target / 1000 ? "#10b981" : "#f59e0b",
-            "#10b981",
-            "#94a3b8",
-            "#64748b",
-            "#475569"
-          ],
-          borderRadius: 6,
-          barThickness: 20
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false }
+    const barData = [
+      userVal,
+      benchmarks.Target / 1000,
+      benchmarks.Global / 1000,
+      benchmarks.EU / 1000,
+      benchmarks.US / 1000
+    ];
+    const barColors = [
+      userVal <= benchmarks.Target / 1000 ? "#10b981" : "#f59e0b",
+      "#10b981", "#94a3b8", "#64748b", "#475569"
+    ];
+
+    if (chartInstances.comparison) {
+      chartInstances.comparison.data.datasets[0].data = barData;
+      chartInstances.comparison.data.datasets[0].backgroundColor = barColors;
+      chartInstances.comparison.options.scales.x.ticks.color = labelColor;
+      chartInstances.comparison.options.scales.y.ticks.color = labelColor;
+      chartInstances.comparison.options.scales.y.grid.color = gridColor;
+      chartInstances.comparison.options.scales.y.title.color = labelColor;
+      chartInstances.comparison.update();
+    } else {
+      chartInstances.comparison = new Chart(comparisonCtx, {
+        type: "bar",
+        data: {
+          labels: ["Your Footprint", "Climate Target", "Global Avg", "EU Avg", "US Avg"],
+          datasets: [{
+            data: barData,
+            backgroundColor: barColors,
+            borderRadius: 6,
+            barThickness: 20
+          }]
         },
-        scales: {
-          x: {
-            grid: { display: false },
-            ticks: { color: labelColor, font: { family: fontName, size: 9, weight: 600 } }
-          },
-          y: {
-            grid: { color: gridColor },
-            ticks: { color: labelColor, font: { family: fontName, size: 10 } },
-            title: {
-              display: true,
-              text: "Metric Tons CO2e / Year",
-              color: labelColor,
-              font: { family: fontName, size: 10, weight: 700 }
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { color: labelColor, font: { family: fontName, size: 9, weight: 600 } }
+            },
+            y: {
+              grid: { color: gridColor },
+              ticks: { color: labelColor, font: { family: fontName, size: 10 } },
+              title: {
+                display: true,
+                text: "Metric Tons CO2e / Year",
+                color: labelColor,
+                font: { family: fontName, size: 10, weight: 700 }
+              }
             }
           }
         }
-      }
-    });
+      });
+    }
   }
 
   // D. Dynamic Insights Generation
@@ -727,23 +750,23 @@
 
   function updateHabitStreak() {
     const todayStr = new Date().toISOString().split("T")[0];
-    
+
     if (!state.lastLoggedDate) {
       state.streak = 1;
+    } else if (state.lastLoggedDate === todayStr) {
+      // Already logged today — streak stays the same, don't double-increment
+      return;
     } else {
-      const lastDate = new Date(state.lastLoggedDate);
-      const today = new Date(todayStr);
-      
-      // Calculate day difference
-      const diffTime = Math.abs(today - lastDate);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      
+      // Compare date strings directly to avoid DST / timezone ms-diff bugs
+      const last = new Date(state.lastLoggedDate + 'T00:00:00');
+      const today = new Date(todayStr + 'T00:00:00');
+      const diffDays = Math.round((today - last) / (1000 * 60 * 60 * 24));
+
       if (diffDays === 1) {
         state.streak++;
-      } else if (diffDays > 1) {
-        state.streak = 1; // reset if skipped a day
+      } else {
+        state.streak = 1; // reset if a day was skipped
       }
-      // if diffDays === 0, user already logged today, streak remains unchanged
     }
     state.lastLoggedDate = todayStr;
   }
@@ -759,16 +782,22 @@
   }
 
   function showToastNotification(action, leveledUp) {
-    const container = document.createElement("div");
-    container.style.position = "fixed";
-    container.style.bottom = "24px";
-    container.style.right = "24px";
-    container.style.zIndex = "1000";
-    container.style.display = "flex";
-    container.style.flexDirection = "column";
-    container.style.gap = "10px";
-    
-    document.body.appendChild(container);
+    // Use the persistent ARIA live region to announce to screen readers
+    const liveRegion = document.getElementById('toast-live-region');
+    if (liveRegion) {
+      liveRegion.textContent = `Action logged: saved ${action.co2Saved} kg CO₂ and earned ${action.xp} XP.`;
+      // Clear after announcement so it re-fires on next action
+      setTimeout(() => { liveRegion.textContent = ''; }, 3000);
+    }
+
+    // Use a single persistent toast container
+    let container = document.getElementById('toast-container');
+    if (!container) {
+      container = document.createElement("div");
+      container.id = 'toast-container';
+      container.style.cssText = "position:fixed;bottom:24px;right:24px;z-index:1000;display:flex;flex-direction:column;gap:10px;";
+      document.body.appendChild(container);
+    }
 
     const toast = document.createElement("div");
     toast.className = "glass-panel";
@@ -1129,6 +1158,26 @@
     // Calc Results buttons
     DOM.btnCalcGoDashboard.addEventListener("click", () => {
       switchTab("dashboard");
+    });
+    DOM.btnCalcDownloadPdf.addEventListener("click", () => {
+      const element = document.querySelector('.calc-step[data-step="4"]');
+      const btnGroup = element.querySelector('.btn-group');
+      
+      const opt = {
+        margin:       0.5,
+        filename:     'EcoStride_Footprint_Assessment.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+      
+      // Temporarily hide the button group so it isn't in the PDF
+      if(btnGroup) btnGroup.style.display = 'none';
+      
+      html2pdf().set(opt).from(element).save().then(() => {
+        // Restore buttons
+        if(btnGroup) btnGroup.style.display = 'flex';
+      });
     });
     DOM.btnCalcReassess.addEventListener("click", () => {
       setCalcStep(1);

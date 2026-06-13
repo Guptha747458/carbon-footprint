@@ -16,11 +16,19 @@
   
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- html2pdf.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   
   <!-- Main Stylesheet -->
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <!-- Skip Navigation Link -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- ARIA live region for toast notifications -->
+  <div id="toast-live-region" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
   <!-- Ambient Background Blobs -->
   <div class="ambient-blob blob-1"></div>
   <div class="ambient-blob blob-2"></div>
@@ -40,18 +48,18 @@
       </div>
       
       <!-- Desktop Navigation Tabs -->
-      <nav class="nav-tabs">
-        <button class="nav-btn active" data-tab="dashboard" id="btn-tab-dashboard">
-          <i class="fa-solid fa-chart-pie"></i> Dashboard
+      <nav class="nav-tabs" aria-label="Main navigation">
+        <button class="nav-btn active" data-tab="dashboard" id="btn-tab-dashboard" aria-selected="true" role="tab">
+          <i class="fa-solid fa-chart-pie" aria-hidden="true"></i> Dashboard
         </button>
-        <button class="nav-btn" data-tab="calculator" id="btn-tab-calculator">
-          <i class="fa-solid fa-calculator"></i> Calculator
+        <button class="nav-btn" data-tab="calculator" id="btn-tab-calculator" aria-selected="false" role="tab">
+          <i class="fa-solid fa-calculator" aria-hidden="true"></i> Calculator
         </button>
-        <button class="nav-btn" data-tab="habits" id="btn-tab-habits">
-          <i class="fa-solid fa-list-check"></i> Action Hub
+        <button class="nav-btn" data-tab="habits" id="btn-tab-habits" aria-selected="false" role="tab">
+          <i class="fa-solid fa-list-check" aria-hidden="true"></i> Action Hub
         </button>
-        <button class="nav-btn" data-tab="simulator" id="btn-tab-simulator">
-          <i class="fa-solid fa-sliders"></i> What-If Sim
+        <button class="nav-btn" data-tab="simulator" id="btn-tab-simulator" aria-selected="false" role="tab">
+          <i class="fa-solid fa-sliders" aria-hidden="true"></i> What-If Sim
         </button>
       </nav>
 
@@ -82,7 +90,7 @@
   </header>
 
   <!-- Main Container -->
-  <main class="main-content">
+  <main class="main-content" id="main-content">
 
     <!-- WELCOME / OVERLAY FOR NEW USERS -->
     <section id="onboarding-gate" class="gate-overlay hidden">
@@ -234,46 +242,46 @@
               <div class="form-group full-width">
                 <label>Which best describes your diet?</label>
                 <div class="radio-card-grid">
-                  <label class="radio-card">
-                    <input type="radio" name="dietType" value="carnivore">
+                  <label class="radio-card" for="diet-carnivore">
+                    <input type="radio" id="diet-carnivore" name="dietType" value="carnivore">
                     <div class="radio-card-content">
-                      <span class="radio-card-icon"><i class="fa-solid fa-drumstick-bite"></i></span>
+                      <span class="radio-card-icon"><i class="fa-solid fa-drumstick-bite" aria-hidden="true"></i></span>
                       <span class="radio-card-title">Heavy Meat Eater</span>
                       <span class="radio-card-desc">Red meat or poultry almost every day.</span>
                     </div>
                   </label>
 
-                  <label class="radio-card">
-                    <input type="radio" name="dietType" value="average" checked>
+                  <label class="radio-card" for="diet-average">
+                    <input type="radio" id="diet-average" name="dietType" value="average" checked>
                     <div class="radio-card-content">
-                      <span class="radio-card-icon"><i class="fa-solid fa-burger"></i></span>
+                      <span class="radio-card-icon"><i class="fa-solid fa-burger" aria-hidden="true"></i></span>
                       <span class="radio-card-title">Average Diet</span>
                       <span class="radio-card-desc">Moderate meat, poultry, dairy, fish.</span>
                     </div>
                   </label>
 
-                  <label class="radio-card">
-                    <input type="radio" name="dietType" value="flexitarian">
+                  <label class="radio-card" for="diet-flexitarian">
+                    <input type="radio" id="diet-flexitarian" name="dietType" value="flexitarian">
                     <div class="radio-card-content">
-                      <span class="radio-card-icon"><i class="fa-solid fa-fish"></i></span>
+                      <span class="radio-card-icon"><i class="fa-solid fa-fish" aria-hidden="true"></i></span>
                       <span class="radio-card-title">Flexitarian</span>
                       <span class="radio-card-desc">Mostly plant-based, occasional meat/fish.</span>
                     </div>
                   </label>
 
-                  <label class="radio-card">
-                    <input type="radio" name="dietType" value="vegetarian">
+                  <label class="radio-card" for="diet-vegetarian">
+                    <input type="radio" id="diet-vegetarian" name="dietType" value="vegetarian">
                     <div class="radio-card-content">
-                      <span class="radio-card-icon"><i class="fa-solid fa-cheese"></i></span>
+                      <span class="radio-card-icon"><i class="fa-solid fa-cheese" aria-hidden="true"></i></span>
                       <span class="radio-card-title">Vegetarian</span>
                       <span class="radio-card-desc">No meat, fish or poultry. Includes dairy/eggs.</span>
                     </div>
                   </label>
 
-                  <label class="radio-card">
-                    <input type="radio" name="dietType" value="vegan">
+                  <label class="radio-card" for="diet-vegan">
+                    <input type="radio" id="diet-vegan" name="dietType" value="vegan">
                     <div class="radio-card-content">
-                      <span class="radio-card-icon"><i class="fa-solid fa-leaf"></i></span>
+                      <span class="radio-card-icon"><i class="fa-solid fa-leaf" aria-hidden="true"></i></span>
                       <span class="radio-card-title">Vegan</span>
                       <span class="radio-card-desc">Strictly plant-based food items only.</span>
                     </div>
@@ -328,6 +336,9 @@
               <div class="btn-group">
                 <button type="button" class="btn btn-primary" id="btn-calc-go-dashboard">
                   Go to Dashboard <i class="fa-solid fa-chart-line"></i>
+                </button>
+                <button type="button" class="btn btn-secondary-accent" id="btn-calc-download-pdf">
+                  Download PDF <i class="fa-solid fa-file-pdf"></i>
                 </button>
                 <button type="button" class="btn btn-outline" id="btn-calc-reassess">
                   Redo Assessment <i class="fa-solid fa-rotate-left"></i>
@@ -415,18 +426,18 @@
             <h3><i class="fa-solid fa-chart-column"></i> Carbon Diagnostics</h3>
           </div>
           <div class="charts-container">
-            <div class="chart-box">
-              <h4>Emissions Breakdown</h4>
-              <div class="canvas-wrapper">
-                <canvas id="categoryChart"></canvas>
+              <div class="chart-box">
+                <h4>Emissions Breakdown</h4>
+                <div class="canvas-wrapper">
+                  <canvas id="categoryChart" role="img" aria-label="Doughnut chart showing carbon emissions breakdown by Transportation, Home Energy and Waste, and Diet categories"></canvas>
+                </div>
               </div>
-            </div>
-            <div class="chart-box">
-              <h4>Benchmark Comparison</h4>
-              <div class="canvas-wrapper">
-                <canvas id="comparisonChart"></canvas>
+              <div class="chart-box">
+                <h4>Benchmark Comparison</h4>
+                <div class="canvas-wrapper">
+                  <canvas id="comparisonChart" role="img" aria-label="Bar chart comparing your carbon footprint against climate target, global average, EU average, and US average"></canvas>
+                </div>
               </div>
-            </div>
           </div>
         </div>
 
@@ -649,6 +660,7 @@
   </footer>
 
   <!-- Application Scripts -->
+  <script src="js/config.js"></script>
   <script src="js/data.js"></script>
   <script src="js/app.js"></script>
 </body>

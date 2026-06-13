@@ -1,0 +1,26 @@
+# render.yaml — Render deployment configuration
+# Docs: https://render.com/docs/render-yaml-spec
+
+services:
+  - type: web
+    name: ecostride
+    runtime: node
+    plan: free                      # Change to 'starter' for production
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000                # Render assigns this automatically
+      - key: MONGODB_URI
+        sync: false                 # Set this manually in Render dashboard (secret)
+      - key: JWT_SECRET
+        generateValue: true         # Render auto-generates a secure random value
+      - key: ALLOWED_ORIGIN
+        # Set to your GitHub Pages URL, e.g.:
+        #   https://guptha747458.github.io
+        # Or comma-separated for multiple:
+        #   https://guptha747458.github.io,https://ecostride.onrender.com
+        sync: false                 # Set manually in Render dashboard

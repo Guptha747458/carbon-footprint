@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Create a free EcoStride account to start tracking and reducing your personal carbon footprint.">
   <title>Sign Up - EcoStride</title>
   
   <!-- Google Fonts - Plus Jakarta Sans -->
@@ -35,34 +36,35 @@
         <p>Create an account to start your journey</p>
       </div>
 
-      <form class="auth-form">
+      <form class="auth-form" id="signup-form" novalidate>
         <div class="form-group">
-          <label for="name">Full Name</label>
+          <label for="signup-name">Full Name</label>
           <div class="input-with-icon">
-            <i class="fa-solid fa-user input-icon"></i>
-            <input type="text" id="name" name="name" required placeholder="John Doe">
+            <i class="fa-solid fa-user input-icon" aria-hidden="true"></i>
+            <input type="text" id="signup-name" name="name" required autocomplete="name" placeholder="John Doe">
           </div>
         </div>
 
         <div class="form-group">
-          <label for="email">Email Address</label>
+          <label for="signup-email">Email Address</label>
           <div class="input-with-icon">
-            <i class="fa-solid fa-envelope input-icon"></i>
-            <input type="email" id="email" name="email" required placeholder="you@example.com">
+            <i class="fa-solid fa-envelope input-icon" aria-hidden="true"></i>
+            <input type="email" id="signup-email" name="email" required autocomplete="email" placeholder="you@example.com">
           </div>
         </div>
 
         <div class="form-group">
-          <label for="password">Password</label>
+          <label for="signup-password">Password</label>
           <div class="input-with-icon">
-            <i class="fa-solid fa-lock input-icon"></i>
-            <input type="password" id="password" name="password" required placeholder="••••••••">
+            <i class="fa-solid fa-lock input-icon" aria-hidden="true"></i>
+            <input type="password" id="signup-password" name="password" required autocomplete="new-password" placeholder="••••••••" minlength="8">
           </div>
+          <small class="form-help">Must be at least 8 characters.</small>
         </div>
 
         <div class="auth-actions">
           <button type="submit" class="btn btn-primary btn-large full-width">
-            Sign Up <i class="fa-solid fa-arrow-right"></i>
+            Sign Up <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
           </button>
         </div>
       </form>
@@ -72,6 +74,7 @@
       </div>
     </div>
   </main>
+  <script src="js/config.js"></script>
   <script src="js/auth.js"></script>
 </body>
 </html>
