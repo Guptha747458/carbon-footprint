@@ -59,36 +59,7 @@ export default function Calculator({ onGoToDashboard }) {
     setResults(null);
   };
 
-  const downloadPDF = () => {
-    const element = document.getElementById('calc-results-pdf-target');
-    if (!element) return;
-    const btnGroup = element.querySelector('.btn-group');
-    
-    if (btnGroup) btnGroup.style.display = 'none';
-    
-    const opt = {
-      margin:       0.5,
-      filename:     'EcoStride_Footprint_Assessment.pdf',
-      image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true },
-      jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-    };
 
-    const runHtml2Pdf = () => {
-      window.html2pdf().set(opt).from(element).save().then(() => {
-        if (btnGroup) btnGroup.style.display = 'flex';
-      });
-    };
-
-    if (window.html2pdf) {
-      runHtml2Pdf();
-    } else {
-      const script = document.createElement('script');
-      script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
-      script.onload = runHtml2Pdf;
-      document.body.appendChild(script);
-    }
-  };
 
   const USavg = ECO_DATA.nationalAverages.US / 1000;
   const globalAvg = ECO_DATA.nationalAverages.Global / 1000;
@@ -390,9 +361,7 @@ export default function Calculator({ onGoToDashboard }) {
                   <button type="button" className="btn btn-primary" onClick={onGoToDashboard}>
                     Go to Dashboard <i className="fa-solid fa-chart-line"></i>
                   </button>
-                  <button type="button" className="btn btn-secondary-accent" onClick={downloadPDF}>
-                    Download PDF <i className="fa-solid fa-file-pdf"></i>
-                  </button>
+
                   <button type="button" className="btn btn-outline" onClick={handleRedo}>
                     Redo Assessment <i className="fa-solid fa-rotate-left"></i>
                   </button>

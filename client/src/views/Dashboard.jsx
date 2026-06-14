@@ -58,7 +58,7 @@ export default function Dashboard({ onAdjustGoal, theme }) {
 
   // 1. Doughnut Chart data
   const doughnutData = {
-    labels: ["Transportation", "Home Energy & Waste", "Diet"],
+    labels: ["Transportation", "Home Energy", "Diet & Waste"],
     datasets: [{
       data: [results.breakdown.transport, results.breakdown.energy, results.breakdown.diet],
       backgroundColor: ["#06b6d4", "#10b981", "#6366f1"],

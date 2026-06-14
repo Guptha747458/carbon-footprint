@@ -880,7 +880,7 @@ input[type="password"]:focus {
   transform: translateY(-2px);
 }
 
-.radio-card input[type="radio"]:checked+.radio-card-content {
+.radio-card.active .radio-card-content {
   border-color: var(--color-primary);
   background: var(--color-primary-light);
   box-shadow: 0 0 12px var(--color-primary-light);
@@ -898,7 +898,7 @@ input[type="password"]:focus {
   transition: var(--transition-smooth);
 }
 
-.radio-card input[type="radio"]:checked+.radio-card-content .radio-card-icon {
+.radio-card.active .radio-card-content .radio-card-icon {
   background: var(--color-primary);
   color: #fff;
 }

@@ -239,8 +239,8 @@ export function calculateFootprint(inputs) {
     total: parseFloat(total.toFixed(2)),
     breakdown: {
       transport: parseFloat(transportAnnual.toFixed(2)),
-      energy: parseFloat((energyAnnual + wasteAnnual).toFixed(2)),
-      diet: parseFloat(dietAnnual.toFixed(2))
+      energy: parseFloat(energyAnnual.toFixed(2)),
+      diet: parseFloat((dietAnnual + wasteAnnual).toFixed(2))
     }
   };
 }
