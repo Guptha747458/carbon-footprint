@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
   const [state, setState] = useState(DEFAULT_STATE);
   const [loading, setLoading] = useState(true);
   const syncTimer = useRef(null);
-
+  
   const API_URL = import.meta.env.VITE_API_URL || '';
 
   // Parse JWT token helper
