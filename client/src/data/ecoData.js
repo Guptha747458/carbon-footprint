@@ -3,7 +3,7 @@
  * Emission factors are standard estimates represented in kg CO2e (carbon dioxide equivalent).
  */
 
-const ECO_DATA = {
+export const ECO_DATA = {
   // Emission factors per unit
   emissionFactors: {
     // Transportation
@@ -192,3 +192,55 @@ const ECO_DATA = {
     }
   ]
 };
+
+export function calculateFootprint(inputs) {
+  const factors = ECO_DATA.emissionFactors;
+  
+  // 1. Transportation Category (annual metric tons CO2e)
+  let transportAnnual = 0;
+  if (inputs.carType !== "none" && inputs.carDist > 0) {
+    const carFactor = factors.transport[inputs.carType] || 0;
+    transportAnnual += (inputs.carDist * 52 * carFactor) / 1000;
+  }
+  if (inputs.transitDist > 0) {
+    transportAnnual += (inputs.transitDist * 52 * factors.transport.public_transit) / 1000;
+  }
+  if (inputs.flightsShort > 0) {
+    transportAnnual += (inputs.flightsShort * factors.transport.flight_short) / 1000;
+  }
+  if (inputs.flightsLong > 0) {
+    transportAnnual += (inputs.flightsLong * factors.transport.flight_long) / 1000;
+  }
+
+  // 2. Home Energy Category (annual metric tons CO2e per household share)
+  let energyAnnual = 0;
+  const hhSize = Math.max(1, inputs.householdSize);
+  if (inputs.electricityBill > 0) {
+    energyAnnual += (inputs.electricityBill * 12 * factors.energy.electricity) / hhSize / 1000;
+  }
+  if (inputs.gasBill > 0) {
+    energyAnnual += (inputs.gasBill * 12 * factors.energy.gas) / hhSize / 1000;
+  }
+
+  // 3. Waste Category (annual metric tons CO2e per household share)
+  let wasteAnnual = 0;
+  if (inputs.wasteProduced > 0) {
+    const recycleFactor = inputs.recycleActive ? factors.energy.waste_reduction_recycling : 0;
+    const baseWasteFactor = factors.energy.waste - recycleFactor;
+    wasteAnnual += (inputs.wasteProduced * 52 * baseWasteFactor) / hhSize / 1000;
+  }
+
+  // 4. Diet Category (already annual, convert kg to tons)
+  const dietAnnual = (factors.diet[inputs.dietType] || 1900) / 1000;
+
+  const total = transportAnnual + energyAnnual + wasteAnnual + dietAnnual;
+
+  return {
+    total: parseFloat(total.toFixed(2)),
+    breakdown: {
+      transport: parseFloat(transportAnnual.toFixed(2)),
+      energy: parseFloat((energyAnnual + wasteAnnual).toFixed(2)),
+      diet: parseFloat(dietAnnual.toFixed(2))
+    }
+  };
+}

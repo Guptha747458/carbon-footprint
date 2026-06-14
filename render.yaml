@@ -17,8 +17,8 @@ services:
     name: ecostride
     runtime: node
     plan: free                      # ← Change to 'starter' for always-on ($7/mo)
-    buildCommand: npm install
-    startCommand: node server.js
+    buildCommand: npm install && npm run build
+    startCommand: npm start
     healthCheckPath: /api/health    # Used by Render + keep-alive.yml ping
     envVars:
       - key: NODE_ENV

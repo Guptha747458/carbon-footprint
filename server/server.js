@@ -7,8 +7,8 @@
  *   GET  /api/user/data
  *   POST /api/user/data
  */
-
-require('dotenv').config(); // Load .env variables before anything else
+const path       = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') }); // Load .env variables relative to server directory
 
 const express    = require('express');
 const cors       = require('cors');
@@ -16,7 +16,6 @@ const mongoose   = require('mongoose');
 const jwt        = require('jsonwebtoken');
 const bcrypt     = require('bcrypt');
 const rateLimit  = require('express-rate-limit');
-const path       = require('path');
 
 const User = require('./models/User');
 
