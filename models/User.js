@@ -40,7 +40,6 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Index on email for fast lookups during login
-userSchema.index({ email: 1 });
+
 
 module.exports = mongoose.model('User', userSchema);
