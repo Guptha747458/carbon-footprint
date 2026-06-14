@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "dev:all": "concurrently -n \"Vite,Express\" -c \"cyan,green\" \"npm run dev --prefix ../client\" \"node server.js\""
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
@@ -15,5 +16,8 @@
     "express-rate-limit": "^8.5.2",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.15.1"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
 }

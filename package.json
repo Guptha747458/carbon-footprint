@@ -1,20 +1,13 @@
 {
-  "name": "ecostride-workspace",
+  "name": "ecostride",
   "version": "1.0.0",
   "private": true,
-  "workspaces": [
-    "client",
-    "server"
-  ],
   "scripts": {
-    "install:all": "npm install",
-    "dev:client": "npm run dev --workspace=client",
-    "dev:server": "npm run dev --workspace=server",
-    "dev": "concurrently -n \"Vite,Express\" -c \"cyan,green\" \"npm run dev:client\" \"npm run dev:server\"",
-    "build": "npm run build --workspace=client",
+    "install:all": "npm install --prefix client && npm install --prefix server",
+    "dev:client": "npm run dev --prefix client",
+    "dev:server": "npm run dev --prefix server",
+    "dev": "npm run dev:all --prefix server",
+    "build": "npm run build --prefix client",
     "start": "node server/server.js"
-  },
-  "devDependencies": {
-    "concurrently": "^8.2.2"
   }
 }

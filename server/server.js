@@ -269,7 +269,11 @@ app.get('/api/health', (req, res) => {
 // =============================================================================
 
 app.use((req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index.html'), (err) => {
+    if (err) {
+      res.status(404).send("Frontend assets not built. Please run 'npm run build' inside the client folder.");
+    }
+  });
 });
 
 // =============================================================================
