@@ -21,9 +21,10 @@ services:
   - type: web
     name: ecostride-api
     runtime: node
+    rootDir: server                 # Render's CWD = repo-root/server/
     plan: free                      # ← Change to 'starter' for always-on ($7/mo)
-    buildCommand: npm install --prefix server
-    startCommand: node server/server.js
+    buildCommand: npm install
+    startCommand: node server.js
     healthCheckPath: /api/health    # Used by Render + keep-alive.yml ping
     envVars:
       - key: NODE_ENV
