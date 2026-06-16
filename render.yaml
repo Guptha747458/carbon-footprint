@@ -1,7 +1,12 @@
 # render.yaml — Render deployment configuration
 # Docs: https://render.com/docs/render-yaml-spec
 #
-# ─── PLAN OPTIONS ─────────────────────────────────────────────────────────────
+# ─── DEPLOYMENT ARCHITECTURE ─────────────────────────────────────────────────
+#
+#  Frontend → Vercel  (React/Vite static site — see vercel.json)
+#  Backend  → Render  (Express/Node.js API — this file)
+#
+# ─── PLAN OPTIONS ────────────────────────────────────────────────────────────
 #
 #  free     → $0/month. Spins down after 15 min inactivity (~30s cold start).
 #             Anti-sleep ping via GitHub Actions keeps it alive 24/7 for free.
@@ -10,15 +15,15 @@
 #  starter  → $7/month. Always-on. No cold starts. Recommended for production.
 #             Change plan: free → starter below, then redeploy.
 #
-# ──────────────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────
 
 services:
   - type: web
-    name: ecostride
+    name: ecostride-api
     runtime: node
     plan: free                      # ← Change to 'starter' for always-on ($7/mo)
-    buildCommand: npm install --prefix client && npm install --prefix server && npm run build --prefix client
-    startCommand: npm start
+    buildCommand: npm install --prefix server
+    startCommand: node server/server.js
     healthCheckPath: /api/health    # Used by Render + keep-alive.yml ping
     envVars:
       - key: NODE_ENV
@@ -31,8 +36,8 @@ services:
         generateValue: true         # Render auto-generates a secure random value
 
       - key: ALLOWED_ORIGIN
-        # Set to your GitHub Pages URL, e.g.:
-        #   https://guptha747458.github.io
+        # Set to your Vercel frontend URL, e.g.:
+        #   https://ecostride.vercel.app
         # Comma-separated for multiple origins:
-        #   https://guptha747458.github.io,https://ecostride.onrender.com
+        #   https://ecostride.vercel.app,https://ecostride-git-main-youruser.vercel.app
         sync: false                 # Set manually in Render dashboard

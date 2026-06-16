@@ -58,6 +58,8 @@ app.use(cors({
     if (allowedOrigins.includes(origin)) return callback(null, true);
     // Allow any GitHub Pages subdomain (*.github.io)
     if (/^https:\/\/[a-z0-9-]+\.github\.io$/i.test(origin)) return callback(null, true);
+    // Allow any Vercel deployment (*.vercel.app) — covers preview & production URLs
+    if (/^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(origin)) return callback(null, true);
     callback(new Error(`CORS: origin '${origin}' is not allowed`));
   },
   methods: ['GET', 'POST'],
