@@ -6,6 +6,7 @@ import Calculator from './views/Calculator';
 import Dashboard from './views/Dashboard';
 import ActionHub from './views/ActionHub';
 import Simulator from './views/Simulator';
+import Assistant from './views/Assistant';
 import GoalModal from './components/GoalModal';
 
 export default function App() {
@@ -254,6 +255,15 @@ export default function App() {
             >
               <i className="fa-solid fa-sliders" aria-hidden="true"></i> What-If Sim
             </button>
+            <button
+              className={`nav-btn ${activeTab === 'assistant' ? 'active' : ''}`}
+              onClick={() => state.onboarded && setActiveTab('assistant')}
+              disabled={!state.onboarded}
+              aria-selected={activeTab === 'assistant'}
+              role="tab"
+            >
+              <i className="fa-solid fa-comment-dots" aria-hidden="true"></i> Eco-Assistant
+            </button>
           </nav>
 
           {/* User Badges & Utilities */}
@@ -315,6 +325,9 @@ export default function App() {
         )}
         {activeTab === 'simulator' && state.onboarded && (
           <Simulator />
+        )}
+        {activeTab === 'assistant' && state.onboarded && (
+          <Assistant onLogAction={handleLogAction} />
         )}
       </main>
 
